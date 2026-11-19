@@ -22,7 +22,7 @@ function norm(){
 
 // ---------- backend ----------
 async function rpc(fn,args){
-  const r=await fetch(`${CFG.supabaseUrl.replace(/\/$/,'')}/rest/v1/rpc/${fn}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.supabaseAnonKey,Authorization:'Bearer '+CFG.supabaseAnonKey},body:JSON.stringify(args)});
+  const r=await fetch(`${CFG.supabaseUrl.replace(/\/$/,'')}/rest/v1/rpc/${fn}`,{method:'POST',headers:Object.assign({'Content-Type':'application/json',apikey:CFG.supabaseAnonKey},/^eyJ/.test(CFG.supabaseAnonKey)?{Authorization:'Bearer '+CFG.supabaseAnonKey}:{}),body:JSON.stringify(args)});
   const txt=await r.text();let body=null;try{body=txt?JSON.parse(txt):null}catch(e){body=txt}
   if(!r.ok){const err=new Error((body&&body.message)||r.statusText);err.code=body&&body.code;throw err}
   return body;
@@ -42,7 +42,7 @@ async function load(){
     }
     S={tasks:d.tasks,people:d.meta.people,ws:d.meta.ws,config:d.meta.config};rev=d.rev;norm();render();
     setSync('Synced · updates every few seconds');
-  }catch(e){if(isAuth(e)){pass='';store.set('ckx-pass','');gate('Wrong password, try again.')}else setSync('Can’t reach the database: '+e.message)}
+  }catch(e){if(isAuth(e)){pass='';store.set('ckx-pass','');gate('Wrong password, try again.')}else if(e.code=='PGRST202')setSync('Database not set up yet: run the setup SQL in Supabase, then refresh.');else setSync('Can’t reach the database: '+e.message)}
 }
 async function write(fn,args){
   if(!REMOTE){store.set('ckx-local',JSON.stringify(S));setSync('Saved in this browser');return}
