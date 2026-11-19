@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Charkonex Launch Board</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="assets/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: launch war-room for a small team
+   IDEA the overnight chart a sleep lab keeps, stretched across the nights to launch and beyond
+   PICTURE four-lane timeline, amber launch line, today line
+   COLOUR Charkonex navy #0B132B ground, #16213E panels, border #2A3A5C, amber #F59E0B, site success/warn/danger
+   TYPE Inter 800 + Inter
+   LAYOUT header + finding; full-width timeline; progress row; board with filters; risks band */
+:root{color-scheme:dark;--bg:#0B132B;--panel:#16213E;--deep:#060B1A;--line:#2A3A5C;--ink:#F1F5F9;--mute:#94A3B8;--soft:#CBD5E1;--amber:#F59E0B;--ok:#10B981;--warn:#FBBF24;--bad:#F87171}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.55 Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,3.5vw,48px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header.band{padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:12px;color:var(--soft);font-weight:600}
+.brand img{width:40px;height:40px;border-radius:10px}
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;margin-top:20px}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:800;text-wrap:balance}
+h1 b{color:var(--amber)}
+.sub{color:var(--mute);margin:10px 0 0;max-width:62ch}
+.count{text-align:right}
+.count .n{font-size:clamp(52px,7vw,84px);font-weight:800;line-height:1;color:var(--amber);font-variant-numeric:tabular-nums}
+.count .l{color:var(--mute);font-size:14px}
+h2{font-size:22px;margin:0 0 14px;letter-spacing:-.01em}
+.tlbox{background:var(--deep);border:1px solid var(--line);border-radius:16px;padding:18px 0 10px;overflow-x:auto;--lw:clamp(200px,32%,320px)}
+.tlin{position:relative;min-width:calc(var(--lw) + 760px);padding-right:18px}
+.ticks,.tr{display:grid;grid-template-columns:var(--lw) minmax(0,1fr);align-items:center}
+.ticks .trk{height:22px;font-size:13px;color:var(--mute)}
+.ticks .trk span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.trk{position:relative;height:16px}
+.ov{position:absolute;top:0;bottom:0;left:var(--lw);right:18px;pointer-events:none;z-index:1}
+.ov i{position:absolute;top:0;bottom:0;border-left:1px dashed var(--line)}
+.ov .launch{border-left:2px solid var(--amber)}
+.ov .today{border-left:2px dotted var(--soft)}
+.ov em{position:absolute;top:-2px;font-style:normal;font-size:12px;font-weight:700;padding:1px 6px;border-radius:6px;white-space:nowrap;transform:translateX(-50%)}
+.ov .launch em{background:var(--amber);color:var(--bg)}
+.ov .today em{background:var(--soft);color:var(--bg);top:auto;bottom:-2px}
+.lane{padding:8px 0;border-top:1px solid var(--line)}
+.lname{font-weight:700;font-size:14px;color:var(--c);margin-bottom:2px;position:sticky;left:0;display:inline-block;padding:0 12px 0 18px;background:var(--deep);z-index:2}
+.tr{padding:3px 0}
+.ticks>span{position:sticky;left:0;background:var(--deep);z-index:2;align-self:stretch}
+.tl{font-size:13px;line-height:1.3;color:var(--soft);padding:0 14px 0 18px;position:sticky;left:0;background:var(--deep);z-index:2;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.tl small{color:var(--mute);font-size:12px}
+.bar{position:absolute;top:3px;height:10px;border-radius:5px;background:var(--c);cursor:pointer;pointer-events:auto}
+.bar.s-todo{background:color-mix(in srgb,var(--c) 35%,transparent);outline:1px solid var(--c);outline-offset:-1px}
+.bar.s-done{opacity:.45}
+.bar.s-blocked{background:var(--bad)}
+.bar.ev{top:0;height:16px;border-radius:3px;min-width:16px;background:var(--c);outline:none;opacity:1;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.evl{position:absolute;top:-1px;font-size:12px;font-weight:600;color:var(--c);white-space:nowrap;z-index:1}
+.prog{display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:12px;margin-top:16px}
+.pc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.pc .t{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.pc .t span{color:var(--mute);font-weight:500;white-space:nowrap}
+.meter{height:8px;background:var(--line);border-radius:4px;margin-top:10px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--c)}
+.pc small{display:block;color:var(--mute);font-size:13px;margin-top:8px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.chip,button,select,input,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;min-height:40px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+input,select,textarea{border-radius:10px;font-size:16px;cursor:auto}
+#q{flex:1 1 180px}
+.primary{background:var(--amber);color:var(--bg);border-color:var(--amber);font-weight:700}
+button:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.sync{font-size:13px;color:var(--mute);margin-left:auto}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:104px minmax(0,1fr) 150px 150px 84px;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.row .ttl{font-weight:600}
+.row .ttl small{display:block;font-weight:400;color:var(--mute);font-size:14px;margin-top:2px}
+.row .ws{font-size:13px;color:var(--c);font-weight:600}
+.row .meta{font-size:14px;color:var(--soft)}
+.row .dt{font-size:14px;color:var(--soft);white-space:nowrap}
+.row .late{color:var(--bad)}
+.row.is-done .ttl{color:var(--mute);text-decoration:line-through}
+.st{border-radius:999px;font-size:13px;font-weight:700;min-height:32px;padding:4px 10px;width:100%}
+.st.todo{background:transparent;color:var(--soft)}
+.st.doing{background:#3A3220;color:var(--warn);border-color:#6b5a2a}
+.st.done{background:#0D3B30;color:var(--ok);border-color:#1d6b55}
+.st.blocked{background:#3B2222;color:var(--bad);border-color:#6b3434}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+.acts button{min-height:36px;padding:4px 10px;font-size:13px;border-radius:8px}
+.empty{color:var(--mute);padding:20px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+.pp{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--mute);color:var(--soft);white-space:nowrap;line-height:1}
+.pp.lead{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.own{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;vertical-align:middle}
+.lname{cursor:pointer}
+.lname .own{margin-left:6px}
+.ownrow{display:flex;align-items:center;gap:8px;margin-top:10px}
+.mini{min-height:30px;padding:2px 10px;font-size:13px;border-radius:8px;margin-left:auto}
+.plabel{font-size:14px;color:var(--mute);align-self:center;margin-right:2px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.sheet .checks label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 14px;min-height:40px;color:var(--ink);font-size:15px}
+.checks input{min-height:0;width:18px;height:18px;padding:0;margin:0;accent-color:var(--amber)}
+.legend{display:inline-flex;gap:6px;align-items:center;vertical-align:middle}
+.note{color:var(--mute);font-size:13px;margin-top:14px}
+.modal{position:fixed;inset:0;background:rgba(6,11,26,.75);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(560px,100%);max-height:100%;overflow:auto;display:grid;gap:12px}
+.sheet label{display:grid;gap:4px;font-size:14px;color:var(--soft)}
+.sheet .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sheet .btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+textarea{min-height:72px;resize:vertical}
+@media(max-width:860px){.row{grid-template-columns:96px minmax(0,1fr) 120px}.row .meta{display:none}.acts{grid-column:2/-1;justify-content:flex-start}}
+@media(max-width:600px){.top{grid-template-columns:1fr}.count{text-align:left}.tlbox{--lw:150px;padding:14px 0 8px}.tl{padding:0 10px 0 12px;font-size:12px}.lname{padding-left:12px}.tlin{min-width:calc(var(--lw) + 620px)}.row{grid-template-columns:1fr;gap:6px}.row .dt{order:-1}.st{width:auto}.acts{grid-column:auto}.sheet .two{grid-template-columns:1fr}.sync{margin-left:0;width:100%}}
+@media(prefers-reduced-motion:no-preference){.bar{transition:filter .15s}.bar:hover{filter:brightness(1.3)}}
+.upd{color:var(--mute);font-size:12px!important;margin-top:4px!important}
+.me{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.me select{min-height:40px}
+.checkline{display:flex!important;flex-direction:row;align-items:center;gap:8px;color:var(--ink)!important;font-size:15px!important}
+.checkline input{min-height:0;width:18px;height:18px;padding:0;margin:0;accent-color:var(--amber)}
+#gate .sheet{width:min(420px,100%)}
+#g-msg{color:var(--bad);margin:0;font-size:14px;min-height:1em}
+</style></head><body>
+<header class="band"><div class="wrap">
+<div class="brand"><img alt="Charkonex logo" src="assets/logo.png">Charkonex · Launch Ops</div>
+<div class="top"><div><h1 id="finding">Launch countdown</h1><p class="sub">Six workstreams: clinic partnerships, digital marketing, regulatory path, sleep algorithm, fundraising and events. Owners show as <span class="legend"><span class="pp lead">lead</span><span class="pp">support</span></span>. Click a bar or task to edit it, a status button to advance it, or a workstream name to change its owners.</p></div>
+<div class="count"><div class="n" id="days">–</div><div class="l" id="dl">days to launch</div></div></div>
+</div></header>
+
+<section class="band" style="padding-top:12px"><div class="wrap">
+<div class="tlbox" id="tl"></div>
+<div class="prog" id="prog"></div>
+</div></section>
+
+<section class="band" style="padding-top:8px"><div class="wrap">
+<h2>Tasks</h2>
+<div class="tools">
+<div id="chips" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+<div id="pchips" style="display:flex;flex-wrap:wrap;gap:8px;width:100%"></div>
+<select id="fs" aria-label="Filter by status"><option value="">All statuses</option><option value="todo">To do</option><option value="doing">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select>
+<input id="q" type="search" placeholder="Search tasks, owners…" aria-label="Search">
+<label class="me" for="me">I am<select id="me"></select></label>
+<button id="team">Team</button>
+<button id="undo" disabled>Undo</button>
+<button class="primary" id="add">+ New task</button>
+<span class="sync" id="sync">Loading…</span>
+</div>
+<div class="list" id="list"></div>
+<p class="note">Pick your name under “I am” so the board records who updated each task. Use Team to replace the A–D placeholders with real names. Changes save to the shared database and show up for everyone within a few seconds.</p>
+</div></section>
+
+<div class="modal" id="modal"><form class="sheet" id="form">
+<h2 id="mt" style="margin:0">Edit task</h2>
+<label>Task<input id="f-title" required></label>
+<div class="two"><label>Workstream<select id="f-ws"></select></label><label>Status<select id="f-status"><option value="todo">To do</option><option value="doing">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></label></div>
+<label>Lead<select id="f-lead"></select></label>
+<div><div style="font-size:14px;color:var(--soft);margin-bottom:6px">Support</div><div class="checks" id="f-sup"></div></div>
+<div class="two"><label>Start<input id="f-start" type="date" required></label><label>Due<input id="f-due" type="date" required></label></div>
+<label class="checkline"><input type="checkbox" id="f-event">This is an event (shows as a marker on the timeline)</label>
+<label>Notes<textarea id="f-note"></textarea></label>
+<div class="btns"><button type="button" id="f-del" style="margin-right:auto;color:var(--bad)">Delete</button><button type="button" data-close>Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></div>
+<div class="modal" id="wmodal"><form class="sheet" id="wform">
+<h2 id="w-title" style="margin:0">Workstream owners</h2>
+<label>Lead<select id="w-lead"></select></label>
+<div><div style="font-size:14px;color:var(--soft);margin-bottom:6px">Support</div><div class="checks" id="w-sup"></div></div>
+<p class="note" style="margin:0">New tasks in this workstream start with these owners.</p>
+<div class="btns"><button type="button" data-close>Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></div>
+<div class="modal" id="tmodal"><form class="sheet" id="tform">
+<h2 style="margin:0">Team and launch date</h2>
+<div id="t-list" style="display:grid;gap:10px"></div>
+<label>Launch date<input id="t-launch" type="date"></label>
+<div class="btns"><button type="button" id="t-add" style="margin-right:auto">+ Add person</button><button type="button" data-close>Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></div>
+<div class="modal" id="gate"><form class="sheet" id="gform">
+<div class="brand"><img alt="" src="assets/logo.png">Charkonex · Launch Ops</div>
+<h2 style="margin:0">Team password</h2>
+<label>Enter the password your team shared with you<input id="g-pass" type="password" autocomplete="current-password" required></label>
+<p id="g-msg"></p>
+<div class="btns"><button class="primary" type="submit">Open board</button></div>
+</form></div>
+
+<script id="seed" type="application/json">{"launch": "2026-12-03", "from": "2026-11-16", "to": "2027-02-28", "people": [{"id": "A", "name": "A"}, {"id": "B", "name": "B"}, {"id": "C", "name": "C"}, {"id": "D", "name": "D"}], "ws": {"o": {"lead": "A", "sup": ["B"]}, "m": {"lead": "B", "sup": ["C"]}, "r": {"lead": "C", "sup": ["A"]}, "a": {"lead": "D", "sup": ["C"]}, "f": {"lead": "A", "sup": ["D"]}, "e": {"lead": "A", "sup": ["B"]}}, "tasks": []}</script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body></html>
